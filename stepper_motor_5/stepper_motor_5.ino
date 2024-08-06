@@ -1,8 +1,8 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial espSerial(2, 4); //Rx - tx 0f esp,TX - rx esp
-LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows
+SoftwareSerial espSerial(2, 3); //Rx - tx 0f esp,TX - rx esp
+LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows A4=SDA-IO18=purple, A5=SCL-IO19=blue
 
 
 const int stepPin = 5;
@@ -13,11 +13,14 @@ const int enableButtonPin = 8; // Button to enable/disable motor
 const int dirButtonPin = 9;    // Button to change direction
 
 // Define constants
-const int stepsPerRevolution = 1600;
+const int stepsPerRevolution = 2000;
 String str;
 // Variables for button states
 bool motorEnabled = true; // Start with the motor enabled
 bool clockwise = false;   // Start with the motor rotating counterclockwise
+// if 1==true== clockwise,,,,, if 0 == false== counterclockwise
+
+
 
 void setup() {
     // Set up serial communication
@@ -43,7 +46,7 @@ void setup() {
 }
 
 void loop() {
-    lcd.clear();
+    // lcd.clear();
     // Read potentiometer value for speed control
     int potValue = analogRead(potPin);
     Serial.println("Potentiometer value: " + String(potValue)); // Debug statement
@@ -71,18 +74,45 @@ void loop() {
         clockwise = !clockwise;
         while (digitalRead(dirButtonPin) == LOW); // Wait for button release
     }
-
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Pwr:");
+    lcd.print(motorEnabled ? "On " : "Off");
+    lcd.print(" Dir:");
+    lcd.print(clockwise ? "CW" : "CCW");
+     lcd.setCursor(0, 1);
+    lcd.print("Speed: ");
+    lcd.print(rpm);
+    lcd.print(" RPM");
     // Rotate the motor if enabled
     if (motorEnabled) {
         // Rotate for a specified duration
+        
         rotate(stepsPerRevolution, stepDelay, clockwise);
-        delay(500); // Wait for 0.5 seconds
+        // delay(500); // Wait for 0.5 seconds
     }
 
-    Serial.println("Motor direction: " + String(clockwise)); // Display motor direction
-    delay(500); // Small delay for readability
-    str =String("coming from arduino: ")+String("speed= ")+String(rpm)+String("dir= ")+String(clockwise)+String("state= ")+String(motorEnabled);
-    espSerial.println(str);
+    // Serial.println("Motor direction: " + String(clockwise)); // Display motor direction
+    // delay(500); // Small delay for readability
+    // str =String("coming from arduino: ")+String("speed= ")+String(rpm)+String("dir= ")+String(clockwise)+String(",state= ")+String(motorEnabled);
+    // espSerial.println(str);
+    // espSerial.print(",");
+  
+
+    // lcd.setCursor(0, 1);
+    // lcd.print("Speed: ");
+    // lcd.print(rpm);
+    // lcd.print(" RPM");
+
+    Serial.println("direction: "+ String(clockwise));
+    Serial.println("powerstatus: "+ String(motorEnabled));
+    espSerial.print(clockwise);
+    espSerial.print(",");
+    espSerial.print(motorEnabled);
+    espSerial.print(",");
+    espSerial.println(rpm);
+
+    delay(1000);
 }
 
 void rotate(int steps, unsigned long stepDelay, bool clockwise) {
