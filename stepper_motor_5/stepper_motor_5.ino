@@ -1,13 +1,20 @@
+#include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial espSerial(2, 4); //Rx - tx 0f esp,TX - rx esp
+LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows
+
+
 const int stepPin = 5;
 const int dirPin = 3;
 const int enaPin = 6;
 const int potPin = A1;
-const int enableButtonPin = 8; // Button to enable/disable motor //PB0 atmega I08 proteus 
-const int dirButtonPin = 9;    // Button to change direction //PB1 atmega   I09 proteus blue button
+const int enableButtonPin = 8; // Button to enable/disable motor
+const int dirButtonPin = 9;    // Button to change direction
 
 // Define constants
 const int stepsPerRevolution = 1600;
-
+String str;
 // Variables for button states
 bool motorEnabled = true; // Start with the motor enabled
 bool clockwise = false;   // Start with the motor rotating counterclockwise
@@ -15,6 +22,16 @@ bool clockwise = false;   // Start with the motor rotating counterclockwise
 void setup() {
     // Set up serial communication
     Serial.begin(9600);
+    // Serial.begin(115200);
+    // espSerial.begin(115200);
+    espSerial.begin(9600);
+
+    //set lcd
+    lcd.init();
+    lcd.backlight();
+
+    lcd.setCursor(0, 0);
+    lcd.print("   WELCOME... ");
     // Set pin modes
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
@@ -26,21 +43,26 @@ void setup() {
 }
 
 void loop() {
+    lcd.clear();
     // Read potentiometer value for speed control
     int potValue = analogRead(potPin);
-  Serial.println("Potentiometer value: " + String(potValue)); // Debug statement
+    Serial.println("Potentiometer value: " + String(potValue)); // Debug statement
 
-  int stepDelay = map(potValue, 0, 1023, 10000, 4000);
-  Serial.println("delay time speed :: " + String(stepDelay)); // Debug statement
+    // Calculate step delay based on potentiometer value
+    int stepDelay = map(potValue, 0, 1023, 10000, 4000);
+    Serial.println("Step delay: " + String(stepDelay)); // Debug statement
 
-    // int stepDelay = map(potValue, 0, 1023, 10000, 4000);
+    // Calculate motor speed in RPM
+    float stepsPerSecond = 1000000.0 / (stepDelay * 2); // Convert microseconds to seconds
+    float rpm = (stepsPerSecond * 60) / stepsPerRevolution;
+    Serial.println("Motor speed (RPM): " + String(rpm)); // Display motor speed in RPM
 
     // Read enable button state
     if (digitalRead(enableButtonPin) == LOW) {
         delay(50); // Debounce delay
         motorEnabled = !motorEnabled;
         digitalWrite(enaPin, motorEnabled ? LOW : HIGH); // Enable is active LOW
-        while (digitalRead(enableButtonPin) == LOW); // Wait for button release
+        while (digitalRead(enableButtonPin) == LOW);  // Wait for button release
     }
 
     // Read direction button state
@@ -48,20 +70,19 @@ void loop() {
         delay(50); // Debounce delay
         clockwise = !clockwise;
         while (digitalRead(dirButtonPin) == LOW); // Wait for button release
-    
     }
 
     // Rotate the motor if enabled
     if (motorEnabled) {
         // Rotate for a specified duration
         rotate(stepsPerRevolution, stepDelay, clockwise);
-        delay(500); // Wait for 5 seconds
+        delay(500); // Wait for 0.5 seconds
     }
-    Serial.println("delay time speed :: " + String(stepDelay));
 
-    Serial.println("motor direction :: " + String(clockwise));
-    delay(500);
-
+    Serial.println("Motor direction: " + String(clockwise)); // Display motor direction
+    delay(500); // Small delay for readability
+    str =String("coming from arduino: ")+String("speed= ")+String(rpm)+String("dir= ")+String(clockwise)+String("state= ")+String(motorEnabled);
+    espSerial.println(str);
 }
 
 void rotate(int steps, unsigned long stepDelay, bool clockwise) {

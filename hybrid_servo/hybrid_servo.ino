@@ -9,9 +9,9 @@
 const int pulsePin = 5;
 const int dirPin = 3;
 const int enablePin = 6;
-const int potPin = A0;
-const int dirButtonPin = A1;
-const int enableButtonPin = A2;
+const int potPin = A1;
+const int dirButtonPin = 9;
+const int enableButtonPin = 8;
 
 // Variables for button states
 bool direction = LOW;
@@ -37,7 +37,7 @@ void setup() {
 void loop() {
     // Read potentiometer value
     int potValue = analogRead(potPin);
-    int delayTime = map(potValue, 0, 1023, 1000, 100);  // Map to appropriate delay for speed control
+    int delayTime = map(potValue, 0, 1023, 40000, 10000);  // Map to appropriate delay for speed control
 
     // Read direction button state
     // if (digitalRead(dirButtonPin) == LOW) {
@@ -72,7 +72,7 @@ void loop() {
     Serial.println("delay time speed :: " + String(delayTime));
     Serial.println("motor state :: " + String(motorEnabled));
     // Serial.println("direction of motor :: " + String(direction));
-    delay(3000);
+    delay(1000);
 }
 
 
