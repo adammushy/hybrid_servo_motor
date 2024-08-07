@@ -1,7 +1,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial espSerial(2, 3); //Rx - tx 0f esp,TX - rx esp
+SoftwareSerial espSerial(2, 4); //Rx - tx 0f esp  IO2/pd2 of arduino -red,TX - rx esp - brown IO4 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows A4=SDA-IO18=purple, A5=SCL-IO19=blue
 
 
@@ -92,17 +92,6 @@ void loop() {
         // delay(500); // Wait for 0.5 seconds
     }
 
-    // Serial.println("Motor direction: " + String(clockwise)); // Display motor direction
-    // delay(500); // Small delay for readability
-    // str =String("coming from arduino: ")+String("speed= ")+String(rpm)+String("dir= ")+String(clockwise)+String(",state= ")+String(motorEnabled);
-    // espSerial.println(str);
-    // espSerial.print(",");
-  
-
-    // lcd.setCursor(0, 1);
-    // lcd.print("Speed: ");
-    // lcd.print(rpm);
-    // lcd.print(" RPM");
 
     Serial.println("direction: "+ String(clockwise));
     Serial.println("powerstatus: "+ String(motorEnabled));
