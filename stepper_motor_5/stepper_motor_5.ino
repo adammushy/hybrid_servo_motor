@@ -80,10 +80,10 @@ void loop() {
     lcd.print(motorEnabled ? "On " : "Off");
     lcd.print(" Dir:");
     lcd.print(clockwise ? "CW" : "CCW");
-     lcd.setCursor(0, 1);
+    lcd.setCursor(0, 1);
     lcd.print("Speed: ");
-    lcd.print(rpm);
-    lcd.print(" RPM");
+    lcd.print(stepDelay);
+    lcd.print("");
     // Rotate the motor if enabled
     if (motorEnabled) {
         // Rotate for a specified duration
@@ -110,14 +110,24 @@ void loop() {
     espSerial.print(",");
     espSerial.print(motorEnabled);
     espSerial.print(",");
-    espSerial.println(rpm);
+    espSerial.println(stepDelay);
 
-    delay(1000);
+    delay(2000);
 }
 
 void rotate(int steps, unsigned long stepDelay, bool clockwise) {
     digitalWrite(dirPin, clockwise ? HIGH : LOW); // Set rotation direction
     for (int i = 0; i < steps; i++) {
+    int potValue = analogRead(potPin);
+
+        int stepDelay = map(potValue, 0, 1023, 10000, 4000);
+        // float stepsPerSecond = 1000000.0 / (stepDelay * 2); // Convert microseconds to seconds
+        // float rpm = (stepsPerSecond * 60) / stepsPerRevolution;
+        // lcd.setCursor(0, 1);
+        // lcd.print("Speed: ");
+        // lcd.print(stepDelay);
+        // lcd.print(" RPM");
+    
         digitalWrite(stepPin, HIGH);
         delayMicroseconds(stepDelay);
         digitalWrite(stepPin, LOW);
