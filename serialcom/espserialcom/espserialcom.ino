@@ -16,7 +16,8 @@ FirebaseData firebaseData;
 
 
 // Replace with your server name
-const char* serverName = "http://157.245.109.105:6000/trash-management/trashbin-view";
+// const char* serverName = "http://157.245.109.105:6000/trash-management/trashbin-view";
+const char* serverName = "https://28f1-197-250-224-1.ngrok-free.app/amcs";
 WiFiClient wificlient;
 String name= "MOTOR DATA";
 String id ="motor-data-1";
